@@ -3,157 +3,499 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Indicadores de Mercado</title>
+  <title>Painel de Mercado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      padding: 8px;
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #18181f;
+      --border: #ffffff0f;
+      --border-hover: #ffffff22;
+      --accent: #c8f135;
+      --text: #e8e8f0;
+      --text-muted: #6b6b80;
+      --green: #39d98a;
     }
-    .grid {
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 36px 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-area h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .logo-area h1 span { color: var(--accent); }
+    .logo-area p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 100px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    #clock {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 #39d98a60; }
+      50% { opacity: 0.8; box-shadow: 0 0 0 5px #39d98a00; }
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Grids */
+    .grid-4 {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      gap: 10px;
+      margin-bottom: 28px;
     }
-    .widget-wrap {
-      border-radius: 8px;
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    /* Bitcoin chart + mini layout */
+    .btc-section {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .btc-chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       overflow: hidden;
-      min-height: 80px;
+      animation: fadeUp 0.4s both;
+    }
+
+    .btc-side {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Widget card */
+    .widget-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: fadeUp 0.5s both;
+    }
+    .widget-card:hover, .btc-chart-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .widget-card:nth-child(1) { animation-delay: 0.04s; }
+    .widget-card:nth-child(2) { animation-delay: 0.08s; }
+    .widget-card:nth-child(3) { animation-delay: 0.12s; }
+    .widget-card:nth-child(4) { animation-delay: 0.16s; }
+    .widget-card:nth-child(5) { animation-delay: 0.20s; }
+
+    .widget-label {
+      padding: 9px 13px 7px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border-bottom: 1px solid var(--border);
+    }
+    .widget-label .icon { font-size: 0.85rem; }
+    .widget-label .name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .widget-label .tag {
+      margin-left: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      background: var(--surface2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .widget-body {
+      height: 90px;
+      background: #fff;
+    }
+    .widget-body .tradingview-widget-container,
+    .widget-body .tradingview-widget-container > div {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .chart-label {
+      padding: 12px 16px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .chart-label .icon { font-size: 1rem; }
+    .chart-label .name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .chart-label .tag {
+      margin-left: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--accent);
+      background: #c8f13515;
+      border: 1px solid #c8f13530;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .chart-body {
+      height: 345px;
+      background: #fff;
+    }
+    .chart-body .tradingview-widget-container,
+    .chart-body .tradingview-widget-container > div {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    footer p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.63rem;
+      color: var(--text-muted);
+      letter-spacing: 0.07em;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 1100px) {
+      .grid-5 { grid-template-columns: repeat(3, 1fr); }
+      .btc-section { grid-template-columns: 1fr; }
+      .btc-side { flex-direction: row; flex-wrap: wrap; }
+      .btc-side .widget-card { flex: 1 1 45%; }
+    }
+    @media (max-width: 800px) {
+      .grid-4, .grid-5, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 500px) {
+      .grid-4, .grid-5, .grid-3 { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; gap: 12px; }
     }
   </style>
 </head>
 <body>
-  <div class="grid">
+<div class="container">
 
-    <!-- Bitcoin -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "BITSTAMP:BTCUSD",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
+  <header>
+    <div class="logo-area">
+      <h1>MERCADO<span>.</span></h1>
+      <p>Painel de indicadores em tempo real</p>
+    </div>
+    <div class="header-right">
+      <span id="clock"></span>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        AO VIVO · TRADINGVIEW
+      </div>
+    </div>
+  </header>
+
+  <!-- Bitcoin Chart + Quote -->
+  <div class="section-label">Bitcoin — Gráfico & Cotação</div>
+  <div class="btc-section">
+
+    <div class="btc-chart-card">
+      <div class="chart-label">
+        <span class="icon">₿</span>
+        <span class="name">Bitcoin / USD</span>
+        <span class="tag">GRÁFICO AO VIVO</span>
+      </div>
+      <div class="chart-body">
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+          {
+            "symbol": "BITSTAMP:BTCUSD",
+            "width": "100%",
+            "height": 345,
+            "interval": "D",
+            "timezone": "America/Sao_Paulo",
+            "theme": "light",
+            "style": "1",
+            "locale": "br",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_top_toolbar": false,
+            "hide_legend": false,
+            "save_image": false,
+            "calendar": false
+          }
+          </script>
+        </div>
       </div>
     </div>
 
-    <!-- Ouro -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "TVC:GOLD",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
+    <div class="btc-side">
+      <div class="widget-card">
+        <div class="widget-label"><span class="icon">₿</span><span class="name">Bitcoin</span><span class="tag">BTC/USD</span></div>
+        <div class="widget-body">
+          <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+          {"symbol":"BITSTAMP:BTCUSD","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+          </script></div>
+        </div>
       </div>
-    </div>
-
-    <!-- Prata -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "TVC:SILVER",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
+      <div class="widget-card">
+        <div class="widget-label"><span class="icon">Ξ</span><span class="name">Ethereum</span><span class="tag">ETH/USD</span></div>
+        <div class="widget-body">
+          <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+          {"symbol":"BITSTAMP:ETHUSD","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+          </script></div>
+        </div>
       </div>
-    </div>
-
-    <!-- Dólar -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "FX:USDBRL",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
+      <div class="widget-card">
+        <div class="widget-label"><span class="icon">🥇</span><span class="name">Ouro</span><span class="tag">XAU/USD</span></div>
+        <div class="widget-body">
+          <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+          {"symbol":"TVC:GOLD","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+          </script></div>
+        </div>
       </div>
-    </div>
-
-    <!-- Petróleo -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "TVC:USOIL",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
-      </div>
-    </div>
-
-    <!-- S&P 500 -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "SP:SPX",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
-      </div>
-    </div>
-
-    <!-- Ibovespa -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "BMFBOVESPA:IBOV",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
-      </div>
-    </div>
-
-    <!-- Selic -->
-    <div class="widget-wrap">
-      <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-        {
-          "symbol": "ECONOMICS:BRINT",
-          "width": "100%",
-          "colorTheme": "light",
-          "isTransparent": false,
-          "locale": "br"
-        }
-        </script>
+      <div class="widget-card">
+        <div class="widget-label"><span class="icon">🥈</span><span class="name">Prata</span><span class="tag">XAG/USD</span></div>
+        <div class="widget-body">
+          <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+          {"symbol":"TVC:SILVER","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+          </script></div>
+        </div>
       </div>
     </div>
 
   </div>
+
+  <!-- Commodities -->
+  <div class="section-label">Commodities</div>
+  <div class="grid-3">
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">🛢️</span><span class="name">Petróleo WTI</span><span class="tag">USOIL</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"TVC:USOIL","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">🛢️</span><span class="name">Petróleo Brent</span><span class="tag">UKOIL</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"TVC:UKOIL","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">🌾</span><span class="name">Soja WD01</span><span class="tag">WD01</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"CBOT:WD01!","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Moedas & Bolsas & Juros -->
+  <div class="section-label">Moedas, Bolsas & Juros</div>
+  <div class="grid-5">
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">💵</span><span class="name">Dólar</span><span class="tag">USD/BRL</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"FX:USDBRL","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">💶</span><span class="name">Euro</span><span class="tag">EUR/BRL</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"FX:EURBRL","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">📈</span><span class="name">S&P 500</span><span class="tag">SPX</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"SP:SPX","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">🇧🇷</span><span class="name">Ibovespa</span><span class="tag">IBOV</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"BMFBOVESPA:IBOV","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+    <div class="widget-card">
+      <div class="widget-label"><span class="icon">🏦</span><span class="name">Selic</span><span class="tag">BR INT</span></div>
+      <div class="widget-body">
+        <div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+        {"symbol":"ECONOMICS:BRINT","width":"100%","height":90,"colorTheme":"light","isTransparent":false,"locale":"br"}
+        </script></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Dados via <a href="https://tradingview.com" target="_blank">TradingView</a> · Atualização em tempo real</p>
+    <p>zyyyyyyyd · notion-widgets</p>
+  </footer>
+
+</div>
+
+<script>
+  function updateClock() {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
 </body>
 </html>
